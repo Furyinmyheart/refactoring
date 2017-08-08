@@ -1,0 +1,35 @@
+{% extends 'layout.html' %}
+{% block title %}{{ object.subject }} - Поддержка{% endblock %}
+
+{% block content %}
+
+<div class="">
+    <h3>{{ object.subject }}</h3>
+
+    <div class="row">
+        <div class="col-lg-8 col-xs-12 support-message">
+
+            {% for message in object.messages.order_by('date_send') %}
+                <div id="support_message_{{ message.pk }}" class="{% if object.from_user_id != message.user_id %}support-message-staff{% endif %}">
+                    <div class="support-message-meta">
+                    <span class="text-muted">{{ message.date_send | localtime | date("SHORT_DATETIME_FORMAT") }}</span>
+                    </div>
+                    <div class="support-message">{{ message.message }}</div>
+                </div>
+            {% endfor %}
+
+            <div id="support-message-form">
+                <form action="" method="post" class="form" id="messages_create_form">
+                    {% csrf_token %}
+                    {{  bootstrap_field(form.message) }}
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-fill btn-primary"><span class="fa fa-send"></span> Отправить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

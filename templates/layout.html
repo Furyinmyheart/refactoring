@@ -1,0 +1,254 @@
+<html>
+<head>
+    <title>{% block title %}{{ request.META['HTTP_HOST'] }}{% endblock %}</title>
+    {% block meta %}
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {% endblock %}
+    {% block css_framework %}
+        {% stylesheet 'css_frameworks' %}
+    {% endblock %}
+
+    {% block head_css %}
+        {% stylesheet 'css_main' %}
+    {% endblock %}
+
+    {% block head_js %}
+    {% endblock %}
+</head>
+<body class="theme-{{ theme }}">
+
+    <div class="wrapper">
+        <div class="sidebar" data-color="blue" data-image="/static/components/light-bootstrap-dashboard/assets/img/sidebar-2.jpg">
+
+            <div class="sidebar-wrapper">
+                <div class="logo">
+                    <a href="/" class="simple-text">
+                        {{ request.META['HTTP_HOST'] }}
+                    </a>
+                </div>
+
+                <ul class="nav">
+                    <li {% if request.path == '/' %}class="active"{% endif %}>
+                        <a href="/">
+                            <i class="fa fa-home"></i>
+                            <p>Главная</p>
+                        </a>
+                    </li>
+                    <li {% if request.path.startswith(url('message_list')) or request.path.startswith('/support') %}class="active"{% endif %}>
+                        <a href="{{ url('message_list') }}">
+                            <i class="fa fa-envelope-o"></i>
+                            <p>Сообщения <span class="badge">{{ request.user.count_unread_messages() or '' }}</span></p>
+                        </a>
+                    </li>
+                    {% if user.has_perm('users.can_create_admin') or user.has_perm('users.can_create_manager') or user.has_perm('users.can_create_agent') %}
+                     <li {% if request.path.startswith(url('users')) %}class="active"{% endif %}>
+                        <a data-toggle="collapse" href="#users_links" aria-expanded="true" class="collapsed">
+                            <i class="fa fa-users"></i>
+                            <p>Агенты <b class="caret"></b></p>
+                        </a>
+                        <div class="collapse" id="users_links" aria-expanded="false">
+                            <ul class="nav">
+                                <li><a href="{{ url('user_create') }}">Добавить агента</a></li>
+                                <li><a href="{{ url('users') }}">Мои агенты</a></li>
+                                {% if user.has_perm('alert_messages.can_send_message_all_child') or user.has_perm('alert_messages.can_send_message_child') %}
+                                <li><a href="{{ url('message_create') }}">Сообщение агентам</a></li>
+                                {% endif %}
+                                {% if user.has_perm('users.can_move_child') %}
+                                <li><a href="{{ url('user_move_child_user_select') }}">Перемещение агентов</a></li>
+                                {% endif %}
+                                <li><a href="{{ url('users_archive') }}">Архив</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    {% endif %}
+                    <li {% if request.path.startswith(url('request_list')) %}class="active"{% endif %}>
+                        <a data-toggle="collapse" href="#cards_links" aria-expanded="true" class="collapsed">
+                            <i class="fa fa-file-text-o"></i>
+                            <p>Заявки <b class="caret"></b></p>
+                        </a>
+                        <div class="collapse" id="cards_links" aria-expanded="false">
+                            <ul class="nav">
+                                <li><a href="{{ url('request_list') }}">Мои заявки</a></li>
+                                {% if request.user.has_perm('cards.can_view_child') %}
+                                <li><a href="{{ url('request_list_child') }}">Заявки агентов</a></li>
+                                {% endif %}
+                                <li><a href="{{ url('request_stat') }}">Упрощенная статистика</a></li>
+                                <li><a href="{{ url('export_my') }}">Экспорт моих заявок</a></li>
+                                {% if request.user.has_perm('cards.can_view_child') %}
+                                <li><a href="{{ url('export_child') }}">Экспорт заявок агентов</a></li>
+                                {% endif %}
+                                <li><a href="{{ url('card_search') }}">Поиск в еаисто</a></li>
+                                {% if request.user.has_perm('cards.can_card_search_mass') %}
+                                <li><a href="{{ url('card_search_mass') }}">Массовый поиск в еаисто</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </li>
+                    <li {% if request.path.startswith(url('finance_stat')) %}class="active"{% endif %}>
+                        <a data-toggle="collapse" href="#finance_links" aria-expanded="true" class="collapsed">
+                            <i class="fa fa-rub"></i>
+                            <p>Финансы <b class="caret"></b></p>
+                        </a>
+                        <div class="collapse" id="finance_links" aria-expanded="false">
+                            <ul class="nav">
+                                <li><a href="{{ url('finance_stat') }}">Статистика</a></li>
+                                <li><a href="{{ url('finance_stat_dynamic') }}">Динамика продаж</a></li>
+                                <li><a href="{{ url('finance_my_pays_list') }}">Мои оплаты</a></li>
+                                {% if request.user.has_perm('cards.can_view_child') %}
+                                <li><a href="{{ url('finance_child_pays_list') }}">Оплаты агентов</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </li>
+                    <li {% if request.path.startswith(url('agreement_list')) %}class="active"{% endif %}>
+                        <a data-toggle="collapse" href="#agreement_links" aria-expanded="true" class="collapsed">
+                            <i class="fa fa-file-text-o"></i>
+                            <p>Документы <b class="caret"></b></p>
+                        </a>
+                        <div class="collapse" id="agreement_links" aria-expanded="false">
+                            <ul class="nav">
+                                <li><a href="{{ url('agreement_list') }}">Мои ДКП</a></li>
+                                <li><a href="{{ url('agreement_create') }}">Добавить ДКП</a></li>
+                                <li><a href="{{ STATIC_URL }}example/primer_tovarnogo_cheka.xls">Квитанция</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    {% if request.user.has_perm('stantions.can_change_self') %}
+                    <li {% if request.path.startswith(url('stantion_list')) %}class="active"{% endif %}>
+                        <a data-toggle="collapse" href="#station_links" aria-expanded="true" class="collapsed">
+                            <i class="fa fa-user-md"></i>
+                            <p>Пунты ТО <b class="caret"></b></p>
+                        </a>
+                        <div class="collapse" id="station_links" aria-expanded="false">
+                            <ul class="nav">
+                                <li><a href="{{ url('stantion_list') }}">Станции</a></li>
+                                <li><a href="{{ url('expert_list') }}">Эксперты</a></li>
+                                <li><a href="{{ url('stantion_stat') }}">Статистика</a></li>
+                                {% if request.user.has_perm('stantions.change_generator') %}
+                                <li><a href="{{ url('generator_edit') }}">Настройки генератора</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        <div class="main-panel">
+            <nav class="navbar navbar-default navbar-fixed">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <span class="navbar-brand">{% if self.title() != request.META['HTTP_HOST'] %}{{ self.title() }}{% else %}Добро пожаловать!{% endif %}</span>
+                    </div>
+                    <div class="collapse navbar-collapse">
+                        <ul class="nav navbar-nav navbar-right">
+                            <li>
+                                <a href="#" id="calendar_time"></a>
+                            </li>
+                            <!-- Authentication Links -->
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                                    <span class="avatar fa fa-user"></span> {{ request.user.get_full_name() or request.user.username }} <span class="caret"></span>
+                                </a>
+
+                                <ul class="dropdown-menu" role="menu">
+                                    {% if not request.user.is_email_confirm %}
+                                    <li><a data-toggle="modal" href="#add_email_modal">Привязать свою почту</a></li>
+                                    {% endif %}
+                                    {% if request.user.is_staff %}
+                                    <li><a href="{{ url('admin:index') }}"><i class="fa fa-btn fa-wrench"></i> Админ</a></li>
+                                    {% endif %}
+                                    <li><a href="{{ url('user_change_print_settings_self') }}"><i class="fa fa-btn fa-wrench"></i>Настройка шапки pdf</a></li>
+                                    <li><a href="{{ url('email_change') }}">Смена email</a></li>
+                                    <li><a href="{{ url('password_change') }}">Смена пароля</a></li>
+                                    <li><a href="/logout"><i class="fa fa-btn fa-sign-out"></i>Выход</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            <div class="content">
+                <div class="container-fluid">
+                    {% if messages %}
+                    <div class="messages">
+                        {% for message in messages %}
+                            <div class="alert {% if message.tags %}{{ message.tags }}{% else %}alert-info{% endif %}">
+                            {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </div>
+
+            {% block footer %}
+            <footer class="footer section-dark">
+                <div class="container-fluid">
+                    <nav class="pull-left">
+                        <ul>
+
+                            <li><a href="{{ url('support:chat_list', directory='sent') }}">Поддержка</a></li>
+                            <li>
+                                <a href="/">&nbsp;</a>
+                            </li>
+                        </ul>
+                    </nav>
+                    <div class="copyright pull-right">
+                        &copy; 2017
+                    </div>
+                </div>
+            </footer>
+            {% endblock %}
+
+        </div>
+    </div><!-- /.container-fluid -->
+
+<div class="modal fade" tabindex="-1" role="dialog" id="add_email_modal">
+    <div class="modal-dialog" role="document">
+        <form class="modal-content" action="{{ url('user_email_add') }}" method="post">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Привязывание почты</h4>
+            </div>
+            <div class="modal-body">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="control-label" for="id_email">Email</label>
+                    <input class="form-control" id="id_email" name="email" placeholder="Email" title="" type="email" required="" value="{{ request.user.email_confirm_test or '' }}">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+                <button type="submit" class="btn btn-primary btn-fill">Отправить подтверждение</button>
+            </div>
+        </form><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+{% block css_footer %}
+{% endblock %}
+{% block js_framework %}
+    {% javascript 'js_framework' %}
+{% endblock %}
+{% block content_js %}
+    <script type="text/javascript">
+    window.csrfmiddlewaretoken = '{{ csrf_token }}';
+    </script>
+{% endblock %}
+{% block js_footer %}
+    {% javascript 'js_main' %}
+{% endblock %}
+</body>
+</html>

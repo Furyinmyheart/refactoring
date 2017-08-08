@@ -1,0 +1,180 @@
+{% extends 'layout.html' %}
+{% block title %}{% if child %}Заявки агентов{% else %}Мои заявки{% endif %}{% endblock %}
+
+{% block content %}
+<div class=" request-search-page">
+    <h2>{% if child %}Заявки агентов{% else %}Мои заявки{% endif %}
+        {% if not child %}
+            {% if request.user.is_allow_create_request() %}
+                <a class="btn btn-primary btn-fill pull-right" href="{{ url('request_create') }}"><span class="fa fa-plus"></span> Добавить заявку</a>
+            {% elif not request.user.is_allow_create_request(with_ancestors=False) %}
+                <div class="alert alert-danger">Не достаточно средств для создания карты</div>
+            {% else %}
+                <div class="alert alert-danger">Не достаточно средств для создания карты у вышестоящего партнера, обратитесь к своему брокеру</div>
+            {% endif %}
+        {% endif %}
+    </h2>
+    <div class="well request-search">
+        <form class="form-horizontal" method="get" id="requests_search_form">
+            <div class="form-group">
+                <div class="col-lg-3 col-md-4 col-xs-12">
+                    <label for="id_search_value">Дата создания</label>
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <span class="fa fa-calendar"></span>
+                        </span>
+
+                        <input type="text" class="form-control" name="daterange" value="{% if form.daterange_start.value() and form.daterange_end.value() %}{{ form.daterange_start.value() }} - {{ form.daterange_end.value() }}{% endif %}">
+                        <input type="hidden" id="id_daterange_start" name="daterange_start" value="{{ form.daterange_start.value() or '' }}">
+                        <input type="hidden" id="id_daterange_end" name="daterange_end" value="{{ form.daterange_end.value() or '' }}">
+                    </div>
+                </div>
+            {% if child %}
+                <div class="col-lg-3 col-md-4 col-xs-12">
+                    <label for="id_user">Агент</label>
+                    <select id="id_user" name="user" multiple class="form-control" data-placeholder="Выберете агента" data-allow-clear="true" style="width: 100%">
+                        {% for user in user_qs %}
+                        <option value="{{ user[0] }}" {% if form.user.value() and user[0] in form.user.value() %}selected{% endif %}>{{ user[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endif %}
+                <div class="col-lg-3 col-md-4 col-xs-12">
+                    <label for="id_search_field">Поле поиска</label>
+                    <select class="form-control" id="id_search_field" name="search_field" style="width: 100%">
+                        <option value="ts_vin" {% if form.search_field.value() == 'ts_vin' %}selected{% endif %}>VIN</option>
+                        <option value="diagcard_num" {% if form.search_field.value() == 'diagcard_num' %}selected{% endif %}>Номер карты</option>
+                        <option value="ts_reg_num" {% if form.search_field.value() == 'ts_reg_num' %}selected{% endif %}>Регистрационный номер</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-4 col-xs-12">
+                    <label for="id_search_value">&nbsp;</label>
+                    <input id="id_search_value" name="search_value" class="form-control" value="{{ form.search_value.value() or '' }}" type="text">
+                </div>
+
+            </div>
+            <div class="row form-submit">
+                <div class="col-xs-12">
+                    <button class="btn btn-primary btn-sm btn-fill pull-right" type="submit"><span class="fa fa-search"></span> Найти</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {% include 'pagination.html' %}
+
+    <table class="table table-condensed table-bordered table-hover table-striped">
+    <thead>
+    <tr>
+        <th>№</th>
+        {% if child %}
+        <th>Агент</th>
+        {% endif %}
+        <th>Владелец</th>
+        <th>VIN</th>
+        <th>ТС</th>
+        <th>Кат.</th>
+        <th>Цена</th>
+        <th>Номер карты</th>
+        <th>Статус</th>
+        <th>Дата отправки</th>
+        <th>Дата выполнения</th>
+        <th>Время<br>выполнения</th>
+        <th style="min-width: 99px;">&nbsp;</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for object in object_list %}
+        <tr>
+            <td><a href="{{ url('request_view',pk=object.pk) }}">{{ object.pk }}</a></td>
+            {% if child %}
+                {% if object.author.pk == request.user.pk or object.author.parent_id == request.user.pk %}
+                    <td>{{ object.author }}</td>
+                {% else %}
+                    <td>
+                        {% if object.transaction_with_parent_user(request.user.pk) %}
+                            {% if object.transaction_with_parent_user(request.user.pk).user_id == object.author_id %}
+                                {{ object.author }}
+                            {% else %}
+                                {{ object.transaction_with_parent_user(request.user.pk).user }} ({{ object.author }})</td>
+                            {% endif %}
+                        {% else %}
+                            {{ object.author }}
+                        {% endif %}
+                {% endif %}
+            {% endif %}
+            <td>{{ object.user_last_name }} {{ object.user_first_name }}</td>
+            <td>{{ object.ts_vin }}</td>
+            <td>{{ object.ts_mark }} {{ object.ts_model }}</td>
+            <td>{{ object.get_ts_category_display() }}</td>
+            <td>
+                {% if child and object.get_price_for_parent_user(request.user.pk) %}
+                    {{ object.get_price_for_parent_user(request.user.pk) }}
+                {% else %}
+                    {{ object.price }}</td>
+                {% endif %}
+            </td>
+            <td>{{ object.diagcard_num }}</td>
+            <td>
+                {% if object.is_error() %}
+                    <abbr data-toggle="tooltip" data-html=true title="{{ object.task_logs.first() or "" }}<br>{{ object.get_status_description() }}">{{ object.get_status_display() }}<span class="fa fa-question-circle"></span></abbr>
+                {% elif object.get_status_description() %}
+                    <abbr data-toggle="tooltip" title="{{ object.get_status_description() }}">{{ object.get_status_display() }}<span class="fa fa-question-circle"></span></abbr>
+                {% else %}
+                    {{ object.get_status_display() }}
+                {% endif %}
+            </td>
+            <td>{{ object.date_send | localtime | date('SHORT_DATETIME_FORMAT') }}</td>
+            <td>{{ object.date_done | localtime | date('SHORT_DATETIME_FORMAT') }}</td>
+            <td>{{ object.get_time_execute_formated() }}</td>
+            <td>
+                <div class="btn-group">
+                    <div class="btn-group" title="Действия с картов" data-toggle="tooltip">
+                        <button class="btn btn-xs btn-default" type="button" data-toggle="dropdown"><span class="fa fa-edit"></span> <span class="caret"></span></button>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{ object.get_absolute_url() }}">Просмотреть</a></li>
+                            {% if object.is_allow_change() %}<li><a href="{{ url('request_edit', pk=object.pk) }}">Изменить</a></li>{% endif %}
+                            {% if object.is_allow_delete(request.user) %}
+                            <li><a href="{{ url('request_delete', pk=object.pk) }}">Удалить</a></li>
+                            {% endif %}
+                            <li><a href="{{ url('request_create_from_exist', pk=object.pk) }}">Копировать</a></li>
+                            <li><a href="{{ url('agreement_create_from_request', pk=object.pk) }}">Отправить в ДКП</a></li>
+                            <li><a href="{{ object.get_absolute_url() }}">Логи</a></li>
+                        </ul>
+                    </div>
+                    {% if object.is_allow_print() %}
+                    <div class="btn-group" title="Скачать PDF" data-toggle="tooltip">
+                        <button class="btn btn-xs btn-default" type="button" data-toggle="dropdown">PDF <span class="caret"></span></button>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-header">Новые</li>
+                            <li><a target="_blank" href="{{ url('request_export_black_new',pk=object.pk) }}">Ч/Б Без печати</a></li>
+                            <li><a target="_blank" href="{{ url('request_export_black_stamp_new',pk=object.pk) }}">Ч/Б С печатью</a></li>
+                            <li><a target="_blank" href="{{ url('request_export_color_new',pk=object.pk) }}">Цветная Без печати</a></li>
+                            <li><a target="_blank" href="{{ url('request_export_color_stamp_new',pk=object.pk) }}">Цветная С печатью</a></li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header">Стандартные</li>
+                            <li><a target="_blank" href="{{ url('request_export_black',pk=object.pk) }}">Ч/Б Без печати</a></li>
+                            <li><a target="_blank" href="{{ url('request_export_black_stamp',pk=object.pk) }}">Ч/Б С печатью</a></li>
+                            <li><a target="_blank" href="{{ url('request_export_color',pk=object.pk) }}">Цветная Без печати</a></li>
+                            <li><a target="_blank" href="{{ url('request_export_color_stamp',pk=object.pk) }}">Цветная С печатью</a></li>
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+    {% include 'pagination.html' %}
+</div>
+{% endblock %}
+
+{% block js_footer %}
+    {{ super() }}
+
+
+    {% stylesheet 'requests' %}
+    {% javascript 'requests' %}
+
+{% endblock %}

@@ -1,0 +1,1 @@
+Станция <a href="{% url 'stantion_edit' pk=stantion.pk %}">{{ stantion.org_title }}</a> заморожена на 5 минут из-за ошибки: {{ error_text }}.

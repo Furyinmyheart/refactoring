@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+{% block title %}Добавление ДКП{% endblock %}
+
+{% block content %}
+
+<div class="">
+    <h3>Добавление ДКП</h3>
+    <div class="row">
+        <div class="col-xs-12 col-md-7 col-lg-6">
+            <form action="" method="post" class="form" id="agreement_create_form">
+                {% csrf_token %}
+                {% include 'agreement/form.html' %}
+                <div class="row">
+                    <div class="col-xs-12">
+                        <button type="submit" class="btn btn-fill btn-primary"><span class="fa fa-plus"></span> Добавить</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block js_footer %}
+    {{ super() }}
+    {% stylesheet 'datetimepicker' %}
+    {% javascript 'datetimepicker' %}
+    {% javascript 'agreement_edit' %}
+{% endblock %}

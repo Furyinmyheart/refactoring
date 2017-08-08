@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+{% block title %}Добавление агента{% endblock %}
+
+{% block content %}
+
+<div class="">
+    <h3>Добавление агента</h3>
+    <div class="row">
+        <div class="col-xs-12 col-md-7 col-lg-6">
+            <form action="" method="post" class="form form-horizontal" id="user_form">
+                {% csrf_token %}
+                {{ bootstrap_form_errors(form, type='non_fields') }}
+                {{  bootstrap_form(form, layout='horizontal') }}
+                <div class="form-group">
+                    <div class="col-md-offset-3 col-md-9">
+                        <button type="submit" class="btn btn-fill btn-primary"><span class="fa fa-plus"></span> Добавить</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block js_footer %}
+    {{ super() }}
+    {% javascript 'users' %}
+{% endblock %}

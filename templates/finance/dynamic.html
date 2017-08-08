@@ -1,0 +1,158 @@
+{% extends 'layout.html' %}
+{% block title %}Динамика продаж{% endblock %}
+
+{% block content %}
+<div class="request-search-page">
+    <h2>Динамика продаж
+        <abbr class="pull-right" data-toggle="popover" data-html="true" title="Помощь" data-placement="left" data-trigger="hover"
+              data-content="В данном разделе можно отслеживать динамику продаж сотрудников по количеству и сумме за любой промежуток времени с группировкой по дням и месяцам."
+        ><span class="fa fa-question-circle-o" ></span></abbr>
+    </h2>
+    <div class="well request-search">
+        <form class="form-horizontal" method="post" id="requests_search_form">
+            {% csrf_token %}
+            <div class="form-group">
+                <div class="col-lg-3 col-md-4 col-xs-12">
+                    <label for="id_search_value">Дата</label>
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <span class="fa fa-calendar"></span>
+                        </span>
+                        <input type="text" class="form-control" name="daterange" value="{% if form.daterange_start.value() and form.daterange_end.value() %}{{ form.daterange_start.value() }} - {{ form.daterange_end.value() }}{% endif %}">
+                        <input type="hidden" id="id_daterange_start" name="daterange_start" value="{{ form.daterange_start.value() or '' }}">
+                        <input type="hidden" id="id_daterange_end" name="daterange_end" value="{{ form.daterange_end.value() or '' }}">
+                    </div>
+                </div>
+                {% if request.user.has_perm('cards.can_view_all') or request.user.has_perm('cards.can_view_all_child') %}
+                <div class="col-lg-3 col-md-4 col-xs-12">
+                    <label for="id_user">{{ form.user.label }}</label>
+                    <select id="id_user" name="user" class="form-control">
+                        {% for user in user_qs %}
+                        <option value="{{ user[0] }}" {% if form.user.value() and user[0] == form.user.value() %}selected{% endif %}>{{ user[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                <div class="col-lg-3 col-md-4 col-xs-12">
+                    <label for="id_groupby">{{ form.groupby.label }}</label>
+                    <select class="form-control" id="id_groupby" name="groupby" required="" tabindex="-1" aria-hidden="true">
+                        <option value="day" {% if form.groupby.value() == 'day' %}selected{% endif %}>По дням</option>
+                        <option value="month" {% if form.groupby.value() == 'month' %}selected{% endif %}>По месяцам</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row form-submit">
+                <div class="col-xs-12">
+                    <button class="btn btn-primary btn-sm btn-fill" type="submit"><span class="fa fa-check"></span> Показать</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <table class="table table-condensed table-bordered table-hover table-striped">
+    <thead>
+    <tr>
+        <th>Агент</th>
+        <th>Город</th>
+        <th>Дата</th>
+        <th>Кол-во</th>
+        <th>Сумма</th>
+    </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td rowspan="{{ (date_range | length) + 1 }}">
+                {% if my_stat.user_id == request.user.pk %}
+                Мои заявки
+                {% else %}
+                {{ my_stat.fio }}
+                {% endif %}
+            </td>
+            <td rowspan="{{ (date_range | length) + 1 }}">
+                {% if my_stat.user_id != request.user.pk %}
+                {{ my_stat.city or '' }}
+                {% endif %}
+            </td>
+            {% for date_i in date_range %}
+                {% if not loop.first %}<tr>{% endif %}
+                <td>{{ date_i }}</td>
+                <td>
+                    {% if date_i in my_stat['dates'] %}{{ my_stat['dates'][date_i]['count'] }}{% else %}0{% endif %}
+                </td>
+                <td>
+                    {% if date_i in my_stat['dates'] %}{{ my_stat['dates'][date_i]['revenue'] }}{% else %}0{% endif %}
+                </td>
+                {% if not loop.first %}</tr>{% endif %}
+            {% endfor %}
+            <tr>
+                <td><strong>Итого</strong></td>
+                <td>{{ my_stat['count'] }}</td>
+                <td>{{ my_stat['revenue'] }}</td>
+            </tr>
+        </tr>
+        {% if request.user.has_perm('cards.can_view_child') %}
+        <tr>
+            <td colspan="5"><strong>Заявки сотрудников</strong></td>
+        </tr>
+    {% for user_id, user_stat in stat.items() %}
+        <tr>
+            <td rowspan="{{ (date_range | length) + 1 }}">
+                <a href="{{ user_stat.url }}">{{ user_stat.fio }}</a>
+            </td>
+            <td rowspan="{{ (date_range | length) + 1 }}">
+                {{ user_stat.city or '' }}
+            </td>
+            {% for date_i in date_range %}
+                {% if not loop.first %}<tr>{% endif %}
+                <td>{{ date_i }}</td>
+                <td>
+                    {% if date_i in user_stat['dates'] %}{{ user_stat['dates'][date_i]['count'] }}{% else %}0{% endif %}
+                </td>
+                <td>
+                    {% if date_i in user_stat['dates'] %}{{ user_stat['dates'][date_i]['revenue'] }}{% else %}0{% endif %}
+                </td>
+                {% if not loop.first %}</tr>{% endif %}
+            {% endfor %}
+            <tr>
+                <td><strong>Итого</strong></td>
+                <td>{{ user_stat['count'] }}</td>
+                <td>{{ user_stat['revenue'] }}</td>
+            </tr>
+        </tr>
+    {% endfor %}
+        <tr>
+            <td><strong>Всего</strong></td>
+            <td></td>
+            <td></td>
+            <td>{{ stat_sum['count'] }}</td>
+            <td>{{ stat_sum['revenue'] }}</td>
+        </tr>
+        <tr>
+            <td>
+                {% if request.user.has_perm('cards.can_view_child') %}
+                <strong>ВСЕГО (мои + сотрудники)</strong>
+                {% else %}
+                <strong>ВСЕГО</strong>
+                {% endif %}
+            </td>
+            <td></td>
+            <td></td>
+            <td>{{ stat_sum['count'] + my_stat['count'] }}</td>
+            <td>{{ stat_sum['revenue'] + my_stat['revenue'] }}</td>
+        </tr>
+    {% endif %}
+    </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block js_footer %}
+    {{ super() }}
+    {% stylesheet 'select2' %}
+    {% javascript 'select2' %}
+
+    {% stylesheet 'daterangepicker' %}
+    {% javascript 'daterangepicker' %}
+
+    {% javascript 'finance' %}
+
+{% endblock %}

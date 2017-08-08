@@ -1,0 +1,59 @@
+{% extends 'layout.html' %}
+{% block title %}Поддержка{% endblock %}
+
+{% block content %}
+<div class="">
+    <h3>Сообщения
+        <a class="btn btn-primary btn-fill pull-right" href="{{ url('support:chat_create') }}"><span class="fa fa-envelope-o"></span> Написать в поддержку</a>
+    </h3>
+    <br>
+    <div class="row">
+        <div class="col-md-2 col-xs-12 filters">
+            {% include 'messages/messages_nav.html' %}
+        </div>
+        <div class="col-md-10 col-xs-12 messages">
+            {% if object_list %}
+            {% include 'pagination.html' %}
+            <table class="table table-condensed table-hover table-striped">
+            <thead>
+            <tr>
+                <th style="width: 30%">Дата</th>
+                {% if directory == 'inbox' %}
+                    <th>От кого</th>
+                {% else %}
+                {% endif %}
+                <th style="width: 45%">Тема</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for object in object_list %}
+                <tr class="">
+                    <td>
+                        <a href="{{ object.get_absolute_url() }}">
+                        {{ object.messages.all().first().date_send | localtime | date("SHORT_DATETIME_FORMAT") }}
+                        {% if directory == 'inbox' %}
+                        {% if object.unread_count_support() %}<div class="unread-label"><span class="label label-warning">Не прочитано</span></div>{% endif %}
+                        {% else %}
+                        {% if object.unread_count_user() %}<div class="unread-label"><span class="label label-warning">Не прочитано</span></div>{% endif %}
+                        {% endif %}
+                        </a>
+                    </td>
+                    {% if directory == 'inbox' %}
+                    <td><a href="{{ url('user_view', pk=object.from_user_id) }}">{{ object.from_user }}</a></td>
+                    {% else %}
+                    {% endif %}
+                    <td>
+                        {{ object.subject }}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            </table>
+            {% include 'pagination.html' %}
+            {% else %}
+                <div class="alert alert-info">Папка пуста</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'layout.html' %}
+{% block title %}Эксперты{% endblock %}
+
+{% block content %}
+<div class="">
+    <h3>Эксперты
+        <a class="btn btn-primary btn-fill pull-right" href="{{ url('expert_create') }}"><span class="fa fa-plus"></span> Добавить эксперта</a>
+    </h3>
+    <br>
+    <div class="row">
+        <div class="col-xs-12">
+            {% if object_list %}
+            {% include 'pagination.html' %}
+            <table class="table table-condensed table-hover table-striped">
+            <thead>
+            <tr>
+                <th>ФИО</th>
+                <th>Станция</th>
+                <th>&nbsp;</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for object in object_list %}
+                <tr>
+                    <td>{{ object }}</td>
+                    <td>
+                        {{ object.stantion }}
+                        {% if object.stantion.active %}
+                        <br><span class="label label-success">Включена</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a class="btn btn-sm btn-default" data-toggle="tooltip" title="Редактирование" href="{{ url('expert_edit',pk=object.pk) }}"><span class="fa fa-edit"></span></a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            </table>
+            {% include 'pagination.html' %}
+            {% else %}
+                <div class="alert alert-info">Эксперты не найдены</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

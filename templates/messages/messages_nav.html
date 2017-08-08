@@ -1,0 +1,16 @@
+
+            <ul class="filter-list">
+                <li><strong>Сообщения</strong></li>
+                <li><a class="{% if url('message_directory', directory='inbox') == request.path %}active{% endif %}" href="{{ url('message_directory', directory='inbox') }}">Входящие</a></li>
+                <li><a class="{% if url('message_directory', directory='sent') == request.path %}active{% endif %}" href="{{ url('message_directory', directory='sent') }}">Отправленные</a></li>
+                <li><strong>Поддержка</strong></li>
+                {% if request.user.has_perm('support.can_view_child') or request.user.has_perm('support.can_view_all') %}
+                <li><a class="{% if url('support:chat_list', directory='inbox') == request.path %}active{% endif %}" href="{{ url('support:chat_list', directory='inbox') }}">
+                    Входящие {% if unread_support_staff %}<span class="badge">{{ unread_support_staff }}</span>{% endif %}
+                </a></li>
+                {% endif %}
+                <li><a class="{% if url('support:chat_list', directory='sent') == request.path %}active{% endif %}" href="{{ url('support:chat_list', directory='sent') }}">
+                    Отправленные {% if unread_support_user %}<span class="badge">{{ unread_support_user }}</span>{% endif %}
+                </a></li>
+
+            </ul>

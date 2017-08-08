@@ -1,0 +1,26 @@
+{% extends 'layout.html' %}
+{% block title %}Изменение шапки pdf{% endblock %}
+
+{% block content %}
+
+<div class="">
+    <h3>Изменение шапки pdf</h3>
+    <div class="row">
+        <div class="col-xs-12 col-md-7 col-lg-6">
+            <form action="" method="post" class="form form-horizontal" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{  bootstrap_form(form, layout='horizontal') }}
+                <div class="form-group">
+                    <div class="col-md-offset-3 col-md-9">
+                        <button type="submit" class="btn btn-fill btn-primary"><span class="fa fa-check"></span> Сохранить</button>
+                        {% if show_delete %}
+                        <button type="submit" name="delete" value="true" class="btn btn-fill btn-danger"><span class="fa fa-trash"></span> Удалить</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,74 @@
+<form action="" method="post" class="form" id="request_create_form">
+    {% csrf_token %}
+    {{ bootstrap_form_errors(form, type='non_fields') }}
+    <div class="row">
+        <div class="col-xs-6">{{ bootstrap_field(form.user_type) }}</div>
+        <div class="col-xs-6">{{ bootstrap_field(form.org_title, form_group_class='form-group hidden') }}</div>
+    </div>
+    <div class="row">
+        <div class="col-lg-4 col-xs-6">{{ bootstrap_field(form.user_last_name) }}</div>
+        <div class="col-lg-4 col-xs-6">{{ bootstrap_field(form.user_first_name) }}</div>
+        <div class="col-lg-4 col-xs-6">{{ bootstrap_field(form.user_middle_name) }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">{{ bootstrap_field(form.doc_type) }}</div>
+        <div class="col-xs-6">{{ bootstrap_field(form.user_contact) }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">{{ bootstrap_field(form.doc_serial, placeholder='22CC') }}</div>
+        <div class="col-xs-6">{{ bootstrap_field(form.doc_num, placeholder='123456') }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">{{ bootstrap_field(form.doc_issued_date) }}</div>
+        <div class="col-xs-6">{{ bootstrap_field(form.doc_issued_by) }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">{{ bootstrap_field(form.ts_category) }}</div>
+        <div class="col-xs-6">{{ bootstrap_field(form.ts_sub_category, form_group_class='form-group hidden') }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">{{ bootstrap_field(form.ts_reg_num, placeholder='С065MK78') }}</div>
+    </div>
+    <div class="row">
+        <div class="col-lg-4 col-xs-6" data-toggle="tooltip" title="В поле VIN допустимы только латинские буквы (кроме I, O, Q) и цифры. Длина - 17 символов.">
+            {{ bootstrap_field(form.ts_vin, placeholder='Отсутствует') }}
+        </div>
+        <div class="col-lg-4 col-xs-6">{{ bootstrap_field(form.ts_body_num, placeholder='Отсутствует') }}</div>
+        <div class="col-lg-4 col-xs-6">{{ bootstrap_field(form.ts_frame_num, placeholder='Отсутствует') }}</div>
+    </div>
+    <div class="row">
+        <div class="col-lg-4 col-xs-6">{{ bootstrap_field(form.ts_mark) }}</div>
+        <div class="col-lg-4 col-xs-6">{{ bootstrap_field(form.ts_model) }}</div>
+        <div class="col-lg-4 col-xs-6">{{ bootstrap_field(form.ts_year) }}</div>
+        <div class="col-lg-4 col-xs-6">{{ bootstrap_field(form.ts_mileage) }}</div>
+        <div class="col-lg-4 col-xs-6">{{ bootstrap_field(form.ts_mass_base) }}</div>
+        <div class="col-lg-4 col-xs-6">{{ bootstrap_field(form.ts_mass_max) }}</div>
+    </div>
+    <div class="row">
+
+    </div>
+    <div class="row">
+        <div class="col-xs-6">{{ bootstrap_field(form.ts_brakes_type) }}</div>
+        <div class="col-xs-6">{{ bootstrap_field(form.ts_tyre_vendor) }}</div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">
+            {{ bootstrap_field(form.ts_fuel_type) }}
+            {{ bootstrap_field(form.ts_dual_fuel) }}
+        </div>
+        <div class="col-xs-6">
+            {{ bootstrap_field(form.ts_taxi) }}
+            {{ bootstrap_field(form.ts_training) }}
+            {{ bootstrap_field(form.ts_dangerous) }}
+            {{ bootstrap_field(form.is_foreign) }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            {{ bootstrap_field(form.notes) }}
+        </div>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-fill btn-primary"><span class="fa fa-plus"></span> Создать</button>
+    </div>
+</form>

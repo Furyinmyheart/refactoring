@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+{% block title %}Удаление карты{% endblock %}
+
+{% block content %}
+
+<div class="">
+    <h3>Удаление карты</h3>
+    <div class="row">
+        <div class="col-xs-12 col-md-7 col-lg-6">
+            <form action="" method="post" class="form form-horizontal" id="stantion_edit_form">
+                {% csrf_token %}
+                {{  bootstrap_form(form, layout='horizontal' ) }}
+                <p class="text-danger">Вы точно хотите удалить карту?</p>
+                <div class="form-group">
+                    <div class="col-xs-12">
+                        <button type="submit" class="btn btn-fill btn-danger"><span class="fa fa-plus"></span> Удалить</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

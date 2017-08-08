@@ -1,0 +1,22 @@
+Вышестоящий партнер изменил ваши цены:
+{% if old_price.a != price.a %}
+Цена за A - {{ old_price.a }} изменено на {{ price.a }}
+{% endif %}
+{% if old_price.b != price.b %}
+Цена за B - {{ old_price.b }} изменено на {{ price.b }}
+{% endif %}
+{% if old_price.c != price.c %}
+Цена за C - {{ old_price.c }} изменено на {{ price.c }}
+{% endif %}
+{% if old_price.d != price.d %}
+Цена за D - {{ old_price.d }} изменено на {{ price.d }}
+{% endif %}
+{% if old_price.e != price.e %}
+Цена за E - {{ old_price.e }} изменено на {{ price.e }}
+{% endif %}
+{% if old_price.trailer != price.trailer %}
+Цена за Прицеп - {{ old_price.trailer }} изменено на {{ price.trailer }}
+{% endif %}
+{% if test %}
+Остальные категории остались по прежней цене.
+{% endif %}

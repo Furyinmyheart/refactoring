@@ -1,0 +1,64 @@
+{% extends 'layout.html' %}
+{% block title %}Массовый поиск в ЕАИСТО{% endblock %}
+
+{% block content %}
+<div class="request-search-page">
+    <h2>Массовый поиск в ЕАИСТО</h2>
+    <div class="well">
+        <form class="form-horizontal" method="post">
+            {% csrf_token %}
+            {{  bootstrap_form(form, layout='horizontal' ) }}
+            <div class="row form-submit">
+                <div class="col-xs-12">
+                    <button class="btn btn-primary btn-sm btn-fill pull-right" type="submit"><span class="fa fa-search"></span> Найти</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% for error in errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+    {% if card_nums %}
+    <div class="row">
+        <div class="col-xs-12">
+            <h4>Результат:</h4>
+            <div class="table-responsive">
+                <table class="table table-condensed" id="card_search_result_table">
+                    <thead>
+                    <tr>
+                        <th>Номер карты</th>
+                        <th>Номер ЕАИСТО</th>
+                        <th>Марка модель</th>
+                        <th>Дата диагностики</th>
+                        <th>Срок действия</th>
+                        <th>Регистрационный номер</th>
+                        <th>Номер кузова</th>
+                        <th>Станция</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for num in card_nums %}
+                    <tr data-done="false" data-num="{{ num.num }}">
+                        <td>{{ num.num }}</td>
+                        <td class="reg_num"></td>
+                        <td class="ts_mark_model"></td>
+                        <td class="date_done"></td>
+                        <td class="expire_date"></td>
+                        <td class="ts_reg_num"></td>
+                        <td class="ts_body_num"></td>
+                        <td class="stantion_name"></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block js_footer %}
+    {{ super() }}
+    {% javascript 'card_mass_search' %}
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends 'layout.html' %}
+{% block title %}Агент {{ object }}{% endblock %}
+
+{% block content %}
+<div class="">
+    <h1>
+        {{ object }}
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                <span class="fa fa-pencil"></span> <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a href="{{ url('user_edit', pk=object.pk) }}">Редактирование</a></li>
+                {% if user.has_perm('users.can_change_user_child_print_settings') %}
+                <li><a href="{{ url('user_change_print_settings', pk=object.pk) }}">Настройка шапки pdf</a></li>
+                {% endif %}
+                {% if user.has_perm('users.can_move_child') %}
+                <li><a href="{{ url('user_move_child', pk=object.pk) }}">Переместить агентов</a></li>
+                {% endif %}
+                <li><a href="#users_change_comment" data-toggle="modal" data-user-full-name="{{ object }}" data-user-id="{{ object.pk }}">Изменить комментарий</a></li>
+            </ul>
+        </div>
+        <div class="clearfix"></div>
+    </h1>
+    <div class="row">
+        <div class="col-lg-6 col-md-7 col-xs-12">
+            <table class="table table-condensed table-striped table-user-detail">
+                <tbody>
+                <tr>
+                    <td>Логин</td>
+                    <td>
+                        {{ object.username }}
+                        {% if object.is_test_access and request.user.is_superuser %}
+                        <br><span class="label label-default">Тестовый доступ</span>
+                        {% endif %}
+                        {% if not object.is_active %}
+                        <br><span class="label label-warning">Заблокирован</span>
+                        {% endif %}
+                        {% if object.is_archive %}
+                        <br><span class="label label-warning">В архиве</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>ФИО</td>
+                    <td>{{ object.fio }}</td>
+                </tr>
+                <tr>
+                    <td>Email</td>
+                    <td>{{ object.email }}</td>
+                </tr>
+                <tr>
+                    <td>Статус</td>
+                    <td>
+                        <ul class="list-unstyled">
+                            {% for group in object.groups.all() %}
+                            <li>{{ group }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Город</td>
+                    <td>{{ object.city or '' }}</td>
+                </tr>
+                <tr>
+                    <td>Часовой пояс</td>
+                    <td>{{ object.get_timezone_local_name() }}</td>
+                </tr>
+                <tr>
+                    <td>Баланс</td>
+                    <td>{{ object.balance }}<span class="fa fa-rub"></span></td>
+                </tr>
+                <tr>
+                    <td>Лимит на день</td>
+                    <td>
+                        {% if not object.limit_per_day %}
+                            <span class="label label-default">Без ограничений</span>
+                        {% else %}
+                            {{ object.limit_per_day }}<br>
+                            <span class="label label-default">Осталось {{ object.requests_available }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Кредит</td>
+                    <td>
+                        {% if not object.credit %}
+                            <span class="label label-default">Без ограничений</span>
+                        {% else %}
+                            {{ object.credit }}<span class="fa fa-rub"></span><br>
+                            <div class="label label-default">Доступно {{ object.credit + object.balance }}<span class="fa fa-rub"></span></div>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Уведомления об оплате</td>
+                    <td>{{ object.get_notification_settings_display() }}{% if object.notification_settings == 'weekly' %} в {{ object.get_notification_weekly_day_display() or '' }}{% endif %}</td>
+                </tr>
+
+                <tr>
+                    <td>Последний вход</td>
+                    <td>{{ object.last_login | localtime | date('SHORT_DATETIME_FORMAT') }}</td>
+                </tr>
+                <tr>
+                    <td>Дата создания</td>
+                    <td>{{ object.date_joined | localtime | date('SHORT_DATETIME_FORMAT') }}</td>
+                </tr>
+
+                {% if request.user.has_perm('users.can_crud_all_child') and object.parent %}
+                <tr>
+                    <td>Вышестоящий агент</td>
+                    {% if request.user.is_superuser or object.parent.pk != request.user.pk %}
+                    <td><a href="{{ object.parent.get_absolute_url() }}">{{ object.parent }}</a></td>
+                    {% elif object.parent.pk == request.user.pk %}
+                    <td>{{ object.parent }}</td>
+                    {% endif %}
+                </tr>
+                {% endif %}
+                <tr>
+                    <td>Комментарий</td>
+                    <td id="user_comment">{{ object.comment_for_user(request.user) or '' }}</td>
+                </tr>
+                </tbody>
+            </table>
+            <h5>Цены:</h5>
+            <table class="table table-condensed">
+                <thead>
+                <tr>
+                    <th>A</th>
+                    <th>B</th>
+                    <th>C</th>
+                    <th>D</th>
+                    <th>Прицеп</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>{{ object.price_a }}</td>
+                    <td>{{ object.price_b }}</td>
+                    <td>{{ object.price_c }}</td>
+                    <td>{{ object.price_d }}</td>
+                    <td>{{ object.price_trailer }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        {% if child_users_iter %}
+        <div class="col-lg-6 col-md-7 col-xs-12">
+            <h5>Агенты:</h5>
+            <ul>
+                {% for user, item_descr in child_users_iter %}
+                    <li>
+                        <a href="{{ user.get_absolute_url() }}">{{ user.get_label_with_level_indicator(object.get_level()+1) }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+{% block js_footer %}
+    {% include 'users/user_comment_modal.html' %}
+    {{ super() }}
+    <script>
+    var page = 'user_view';
+    </script>
+    {% javascript 'users' %}
+    {% javascript 'users_view' %}
+{% endblock %}

@@ -1,0 +1,27 @@
+    {% if is_paginated %}
+    <ul class="pagination">
+        {% if page_obj.has_previous() %}
+            <li>
+                <a href="?{{ url_replace(request, page=page_obj.paginator.page_range[0]) }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        {% endif %}
+        {% for page in page_obj.paginator.page_range %}
+            {% if page == page_obj.number %}
+            <li class="active"><a href="#">{{ page_obj.number }} <span class="sr-only">(current)</span></a></li>
+            {% elif page_obj.number -3 <= page  <= page_obj.number +3 %}
+            <li><a href="?{{ url_replace(request, page=page) }}">{{ page }}</a></li>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next() %}
+            <li>
+                <a href="?{{ url_replace(request, page=page_obj.paginator.page_range[-1]) }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+    {% endif %}
+    <div class="pagination pull-right text-muted">Всего: {{ page_obj.paginator.count }}</div>

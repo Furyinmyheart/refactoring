@@ -1,0 +1,61 @@
+{% extends 'layout.html' %}
+{% block title %}Поиск ЕАИСТО{% endblock %}
+
+{% block content %}
+<div class=" request-search-page">
+    <h2>Поиск ЕАИСТО</h2>
+    <div class="well">
+        <form class="form-horizontal" method="post">
+            {% csrf_token %}
+            {{  bootstrap_form(form, layout='horizontal' ) }}
+            <div class="row form-submit">
+                <div class="col-xs-12">
+                    <button class="btn btn-primary btn-sm btn-fill pull-right" type="submit"><span class="fa fa-search"></span> Найти</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% if card_not_found %}
+        <p class="text-warning">
+            Карта не найдена.
+        </p>
+    {% endif %}
+    {% for error in errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+    {% if result %}
+    <div class="row">
+        <div class="col-xs-12 col-lg-4 col-md-6">
+            <div class="table-responsive">
+                <table class="table table-condensed">
+                    <tbody>
+                    <tr>
+                        <td>Номер карты</td>
+                        <td>{{ result.diagcard_num }}{% if request.user.is_superuser and result.is_test %}<strong>(X)</strong>{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <td>Марка Модель</td>
+                        <td>{{ result.ts_mark }} {{ result.ts_model }}</td>
+                    </tr>
+                    <tr>
+                        <td>Дата отправки</td>
+                        <td>{{ result.date_done | date('SHORT_DATE_FORMAT') }}</td>
+                    </tr>
+                    <tr>
+                        <td>Срок действия</td>
+                        <td>{{ result.expire_date | date('SHORT_DATE_FORMAT') }}</td>
+                    </tr>
+                    {% if request.user.is_superuser %}
+                    <tr>
+                        <td>Название станции</td>
+                        <td>{{ result.stantion_name }}</td>
+                    </tr>
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

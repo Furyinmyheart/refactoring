@@ -1,0 +1,252 @@
+{% extends 'layout.html' %}
+{% block title %}Заявка {{ object }}{% endblock %}
+
+{% block content %}
+<div class="">
+    <h1>
+        Заявка № {{ object.pk }}
+        <div class="btn-group">
+            {% if object.is_allow_print() %}
+            <div class="btn-group" title="Скачать PDF" data-toggle="tooltip">
+                <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">PDF <span class="caret"></span></button>
+                <ul class="dropdown-menu">
+                    <li class="dropdown-header">Новые</li>
+                    <li><a target="_blank" href="{{ url('request_export_black_new',pk=object.pk) }}">Ч/Б Без печати</a></li>
+                    <li><a target="_blank" href="{{ url('request_export_black_stamp_new',pk=object.pk) }}">Ч/Б С печатью</a></li>
+                    <li><a target="_blank" href="{{ url('request_export_color_new',pk=object.pk) }}">Цветная Без печати</a></li>
+                    <li><a target="_blank" href="{{ url('request_export_color_stamp_new',pk=object.pk) }}">Цветная С печатью</a></li>
+                    <li class="divider"></li>
+                    <li class="dropdown-header">Стандартные</li>
+                    <li><a target="_blank" href="{{ url('request_export_black',pk=object.pk) }}">Ч/Б Без печати</a></li>
+                    <li><a target="_blank" href="{{ url('request_export_black_stamp',pk=object.pk) }}">Ч/Б С печатью</a></li>
+                    <li><a target="_blank" href="{{ url('request_export_color',pk=object.pk) }}">Цветная Без печати</a></li>
+                    <li><a target="_blank" href="{{ url('request_export_color_stamp',pk=object.pk) }}">Цветная С печатью</a></li>
+                </ul>
+            </div>
+            {% endif %}
+            <div class="btn-group" title="Действия с картов" data-toggle="tooltip">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    <span class="fa fa-pencil"></span> <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    {% if object.is_allow_change() %}
+                    <li><a href="{{ url('request_edit', pk=object.pk) }}">Изменить</a></li>
+                    {% endif %}
+                    {% if object.is_allow_delete(request.user) %}
+                    <li><a href="{{ url('request_delete', pk=object.pk) }}">Удалить</a></li>
+                    {% endif %}
+                    <li><a href="{{ url('request_create_from_exist', pk=object.pk) }}">Копировать</a></li>
+                    <li><a href="{{ url('agreement_create_from_request', pk=object.pk) }}">Отправить в ДКП</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </h1>
+    <div class="row">
+        <div class="col-lg-6 col-md-7 col-xs-12">
+            <table class="table table-condensed table-striped table-user-detail">
+                <tbody>
+                <tr>
+                    <td>№ заявки</td>
+                    <td>{{ object.pk }}</td>
+                </tr>
+                <tr>
+                    <td>Статус</td>
+                    <td>
+                        {% if object.is_error() %}
+                            <abbr data-toggle="tooltip" data-html=true title="{{ object.task_logs.first() or "" }}<br>{{ object.get_status_description() }}">{{ object.get_status_display() }}<span class="fa fa-question-circle"></span></abbr>
+                        {% elif object.get_status_description() %}
+                            <abbr data-toggle="tooltip" title="{{ object.get_status_description() }}">{{ object.get_status_display() }}<span class="fa fa-question-circle"></span></abbr>
+                        {% else %}
+                            {{ object.get_status_display() }}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Дата отправки</td>
+                    <td>{{ object.date_send | localtime | date('SHORT_DATETIME_FORMAT') }}</td>
+                </tr>
+                <tr>
+                    <td>Дата выполнения</td>
+                    <td>{{ object.date_done | localtime | date('SHORT_DATETIME_FORMAT') }}</td>
+                </tr>
+                <tr>
+                    <td>Номер карты</td>
+                    <td><strong>{{ object.diagcard_num }}</strong></td>
+                </tr>
+                <tr>
+                    <td>Цена</td>
+                    <td>
+                        {% if child and object.get_price_for_parent_user(request.user.pk) %}
+                            {{ object.get_price_for_parent_user(request.user.pk) }}
+                        {% else %}
+                            {{ object.price }}</td>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% if object.expire_date %}
+                <tr>
+                    <td>Срок действия</td>
+                    <td>{{ object.expire_date | date('SHORT_DATE_FORMAT') }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td>Тип пользователя</td>
+                    <td>{{ object.get_user_type_display() }}</td>
+                </tr>
+                <tr>
+                    <td>ФИО</td>
+                    <td>{{ object.user_last_name }} {{ object.user_first_name }} {{ object.user_middle_name }}</td>
+                </tr>
+                {% if object.user_type == 2 %}
+                <tr>
+                    <td>Организация</td>
+                    <td>{{ object.org_title }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td>Тип документа</td>
+                    <td>{{ object.get_doc_type_display() }}</td>
+                </tr>
+                <tr>
+                    <td>Серия Номер</td>
+                    <td>{{ object.doc_serial }} {{ object.doc_num }}</td>
+                </tr>
+                <tr>
+                    <td>Когда и кем выдан</td>
+                    <td>{{ object.doc_issued_date | date('SHORT_DATE_FORMAT') }} {{ object.doc_issued_by }}</td>
+                </tr>
+                <tr>
+                    <td colspan="2"><h5>ТС</h5></td>
+                </tr>
+                <tr>
+                    <td>Категория</td>
+                    <td>{{ object.get_ts_category_display() }} ({{ object.get_ts_category_okp() }})</td>
+                </tr>
+                <tr>
+                    <td>Регистрационный номер</td>
+                    <td>{{ object.ts_reg_num }}</td>
+                </tr>
+                <tr>
+                    <td>VIN</td>
+                    <td>{{ object.ts_vin }}</td>
+                </tr>
+                <tr>
+                    <td>Номер кузова</td>
+                    <td>{{ object.ts_body_num }}</td>
+                </tr>
+                <tr>
+                    <td>Номер рамы (шасси)</td>
+                    <td>{{ object.ts_frame_num }}</td>
+                </tr>
+                <tr>
+                    <td>Марка модель</td>
+                    <td>{{ object.ts_mark }} {{ object.ts_model }}</td>
+                </tr>
+                <tr>
+                    <td>Год выпуска</td>
+                    <td>{{ object.ts_year }}</td>
+                </tr>
+                <tr>
+                    <td>Пробег</td>
+                    <td>{{ object.ts_mileage }}</td>
+                </tr>
+                <tr>
+                    <td>Масса без нагрузки</td>
+                    <td>{{ object.ts_mass_base }}</td>
+                </tr>
+                <tr>
+                    <td>Максимальная масса</td>
+                    <td>{{ object.ts_mass_max }}</td>
+                </tr>
+                {% if object.ts_brakes_type %}
+                <tr>
+                    <td>Тип тормозной системы</td>
+                    <td>{{ object.get_ts_brakes_type_display() }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td>Марка шин</td>
+                    <td>{{ object.ts_tyre_vendor }}</td>
+                </tr>
+                {% if object.ts_fuel_type %}
+                <tr>
+                    <td>Тип топлива</td>
+                    <td>{{ object.get_ts_fuel_type_display() }}</td>
+                </tr>
+                {% endif %}
+                {% if object.ts_dual_fuel %}
+                <tr>
+                    <td>Двухтопливная система</td>
+                    <td>{{ object.get_ts_dual_fuel_display() }}</td>
+                </tr>
+                {% endif %}
+                {% if object.ts_taxi or object.ts_training or object.ts_dangerous or object.is_foreign %}
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>
+                            <ul class="list-unstyled">
+                                {% if object.ts_taxi %}<li>Такси</li>{% endif %}
+                                {% if object.ts_training %}<li>Учебная езда</li>{% endif %}
+                                {% if object.ts_dangerous %}<li>Опасные грузы</li>{% endif %}
+                                {% if object.is_foreign %}<li>Иностранный гражданин</li>{% endif %}
+                            </ul>
+                        </td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <td>Примечание</td>
+                    <td>{{ object.notes }}</td>
+                </tr>
+                {% if object.author_id != request.user.pk %}
+                <tr>
+                    <td>Автор</td>
+                    {% if object.author.pk == request.user.pk or object.author.parent_id == request.user.pk %}
+                        <td>{{ object.author }}</td>
+                    {% else %}
+                        <td>
+                            {% if object.transaction_with_parent_user(request.user.pk) %}
+                                {{ object.transaction_with_parent_user(request.user.pk).user }} ({{ object.author }})</td>
+                            {% else %}
+                                {{ object.author }}
+                            {% endif %}
+                    {% endif %}
+                </tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+        {% if object.task_logs.count() %}
+        <div class="col-lg-6 col-md-5 col-xs-12">
+            <div class="card-logs">
+                <h4>Логи:</h4>
+                <table class="table table-condensed table-striped table-card-logs">
+                    <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Сообщение</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for log_entry in object.task_logs.all() %}
+                    <tr>
+                        <td>{{ log_entry.date_created | localtime | date('SHORT_DATETIME_FORMAT') }}</td>
+                        <td>{{ log_entry.message }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+{% block js_footer %}
+    {{ super() }}
+    <script type="application/javascript">
+    jQuery(function ($) {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+    </script>
+{% endblock %}

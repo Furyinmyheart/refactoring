@@ -1,0 +1,53 @@
+{% extends 'layout.html' %}
+{% block title %}Договор купли продажи{% endblock %}
+
+{% block content %}
+<div class="">
+    <h3>Договор купли продажи
+        <a class="btn btn-primary btn-fill pull-right" href="{{ url('agreement_create') }}"><span class="fa fa-plus"></span> Добавить ДКП</a>
+    </h3>
+    <br>
+    <div class="row">
+        <div class="col-xs-12">
+            {% if object_list %}
+            {% include 'pagination.html' %}
+            <table class="table table-condensed table-hover table-striped">
+            <thead>
+            <tr>
+                <th>Номер договора</th>
+                <th>Дата договора</th>
+                <th>Продавец</th>
+                <th>Покупатель</th>
+                <th>VIN</th>
+                <th>Марка</th>
+                <th>Модель</th>
+                <th>Цена</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for object in object_list %}
+                <tr>
+                    <td>{{ object.agreement_number }}</td>
+                    <td>{{ object.agreement_date | date("SHORT_DATE_FORMAT") }}</td>
+                    <td>{{ object.seller_user_last_name }} {{ object.seller_user_first_name }} {{ object.seller_user_middle_name }}</td>
+                    <td>{{ object.buyer_user_last_name }} {{ object.buyer_user_first_name }} {{ object.buyer_user_middle_name }}</td>
+                    <td>{{ object.ts_vin }}</td>
+                    <td>{{ object.ts_mark }}</td>
+                    <td>{{ object.ts_model }}</td>
+                    <td>{{ object.price }}</td>
+                    <td>
+                        <a class="btn btn-sm btn-default" href="{{ url('agreement_download', pk=object.pk) }}"><span class="fa fa-file-word-o"></span></a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            </table>
+            {% include 'pagination.html' %}
+            {% else %}
+                <div class="alert alert-info">Договора ещё не созданы.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

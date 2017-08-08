@@ -1,0 +1,76 @@
+{% extends 'layout.html' %}
+{% block content %}
+    <div class="">
+        <div class="row">
+            <div class="col-md-6">
+                {% if last_message %}
+                <div class="card">
+                    <div class="header">
+                        <h4 class="title">Сообщение</h4>
+                        <p class="category">Отправлено {{ last_message.date_send | localtime | date("SHORT_DATETIME_FORMAT") }}</p>
+                    </div>
+                    <div class="content">
+                        {% if last_message.is_html %}
+                        <p>{{ last_message.text|safe }}</p>
+                        {% else %}
+                        <p>{{ last_message.text }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if not request.user.email_confirm_key and not request.user.is_email_confirm %}
+                <div class="card">
+                    <div class="content">
+                        <p>Я хочу <a data-toggle="modal" href="#add_email_modal">привязать свою почту</a> для восстановления пароля и получения новостей от системы</p>
+                        <p class="text-right">
+                            <a class="btn btn-sm btn-warning btn-fill" data-toggle="modal" href="#add_email_modal">Привязать свою почту</a>
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+            <div class="col-md-6">
+                <div class="card card-tasks tasks">
+                    <div class="header">
+                        <h4 class="title">Финансовая информация</h4>
+                    </div>
+                    <div class="content">
+                        <p>Цена за карту: {{ request.user.price_b }}<span class="fa fa-rub"></span></p>
+                        <p>Лимит на день:
+                            {% if request.user.limit_per_day %}
+                                {{ request.user.limit_per_day }} <small class="text-muted">Осталось {{ request.user.requests_available }}</small>
+                            {% else %}
+                                <span class="label label-default">Без ограничений</span>
+                            {% endif %}
+                        </p>
+                        <p>Кредит:
+                            {% if not request.user.credit %}
+                                <span class="label label-default">Без ограничений</span>
+                            {% else %}
+                                {{ request.user.credit }} <small class="text-muted">Доступно {{ request.user.credit + request.user.balance }}<span class="fa fa-rub"></span></small>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {% include 'messages/pay_alert_modal.html' %}
+{% endblock %}
+{% block js_footer %}
+    {{ super() }}
+
+    {% javascript 'dashboard' %}
+    <script>
+        {% if pay_alert_show %}
+            jQuery(function($) {
+                $('#alert_messages_pay_alert').modal('show');
+            });
+        {% endif %}
+    </script>
+{% endblock %}

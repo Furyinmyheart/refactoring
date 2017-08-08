@@ -1,0 +1,62 @@
+{% extends 'layout.html' %}
+{% block title %}Статистика{% endblock %}
+
+{% block content %}
+<div class="request-search-page">
+    <h2>Статистика</h2>
+    <div class="well request-search">
+        <form class="form-horizontal" method="post" id="requests_search_form">
+            {% csrf_token %}
+            <div class="form-group">
+                <div class="col-lg-4 col-md-5 col-xs-12">
+                    <label for="id_search_value">Дата</label>
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <span class="fa fa-calendar"></span>
+                        </span>
+                        <input type="text" class="form-control" name="daterange" value="{% if form.daterange_start.value() and form.daterange_end.value() %}{{ form.daterange_start.value() }} - {{ form.daterange_end.value() }}{% endif %}">
+                        <input type="hidden" id="id_daterange_start" name="daterange_start" value="{{ form.daterange_start.value() or '' }}">
+                        <input type="hidden" id="id_daterange_end" name="daterange_end" value="{{ form.daterange_end.value() or '' }}">
+                    </div>
+                </div>
+            </div>
+            <div class="row form-submit">
+                <div class="col-xs-12">
+                    <button class="btn btn-primary btn-sm btn-fill" type="submit"><span class="fa fa-check"></span> Показать</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <table class="table table-condensed table-bordered table-hover table-striped">
+    <thead>
+    <tr>
+        <th>Станция</th>
+        <th>Всего карт</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    {% for stantion_stat in stats %}
+        <tr>
+            <td><a href="{{ url('stantion_edit', pk=stantion_stat.stantion_id) }}">{{ stantion_stat.stantion__org_title }}</a></td>
+            <td>{{ stantion_stat.req_count }}</td>
+        </tr>
+    {% endfor %}
+        <tr>
+            <td><strong>Всего</strong></td>
+            <td><strong>{{ req_count_all }}</strong></td>
+        </tr>
+    </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block js_footer %}
+    {{ super() }}
+
+    {% stylesheet 'daterangepicker' %}
+    {% javascript 'daterangepicker' %}
+
+    {% javascript 'stantion_stat' %}
+
+{% endblock %}

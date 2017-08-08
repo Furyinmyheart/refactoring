@@ -1,0 +1,97 @@
+{% extends 'layout.html' %}
+{% block title %}Упрощенная статистика{% endblock %}
+
+{% block content %}
+<div class=" request-search-page">
+    <h2>Упрощенная статистика
+        <abbr class="pull-right" data-toggle="popover" data-html="true" title="Помощь" data-placement="left" data-trigger="hover"
+              data-content="В данном разделе отображатеся таблица с общим количеством созданных карт сотрудника за заданный промежуток времени.<br>Отображаются только сотрудники, которые создавали ДК."
+        ><span class="fa fa-question-circle-o" ></span></abbr>
+    </h2>
+    <div class="well">
+        <form class="form-horizontal" method="post" id="requests_search_form">
+            {% csrf_token %}
+            <div class="form-group">
+                <div class="col-lg-4 col-md-5 col-xs-12">
+                    <label for="id_search_value">Дата создания</label>
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <span class="fa fa-calendar"></span>
+                        </span>
+                        <input type="text" class="form-control" name="daterange" value="{% if form.daterange_start.value() and form.daterange_end.value() %}{{ form.daterange_start.value() }} - {{ form.daterange_end.value() }}{% endif %}">
+                        <input type="hidden" id="id_daterange_start" name="daterange_start" value="{{ form.daterange_start.value() or '' }}">
+                        <input type="hidden" id="id_daterange_end" name="daterange_end" value="{{ form.daterange_end.value() or '' }}">
+                    </div>
+                {% for error in form.daterange_start.errors %}
+                    <p class="help-block">{{ error }}</p>
+                {% endfor %}
+                {% for error in form.daterange_end.errors %}
+                    <p class="help-block">{{ error }}</p>
+                {% endfor %}
+                </div>
+            </div>
+            <div class="row form-submit">
+                <div class="col-xs-12">
+                    <button class="btn btn-primary btn-sm btn-fill" type="submit"><span class="fa fa-check"></span> Показать</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="table-responsive">
+
+        <table class="table table-condensed">
+            <thead>
+            <tr>
+                <th>Сотрудник</th>
+                <th>Логин</th>
+                <th>Кол-во</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Мои заявки</td>
+                <td>&nbsp;</td>
+                <td>{{ my_stats }}</td>
+            </tr>
+            {% if request.user.has_perm('cards.can_view_child') %}
+            <tr>
+                <td colspan="3"><strong>Заявки сотрудников</strong></td>
+            </tr>
+            {% for stat in stats %}
+                <tr>
+                <td>
+                    <a href="{{ url('user_view', pk=stat.pk) }}">{{ stat.fio or stat.username }}</a>
+                </td>
+                <td>{{ stat.username }}</td>
+                <td>{{ stat.req_count }}</td>
+                </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="2"><strong>ВСЕГО</strong></td>
+                <td><strong>{{ req_count_all }}</strong></td>
+            </tr>
+            {% endif %}
+            <tr>
+                <td colspan="2">
+                    {% if request.user.has_perm('cards.can_view_child') %}
+                    <strong>ВСЕГО (мои + сотрудники)</strong>
+                    {% else %}
+                    <strong>ВСЕГО</strong>
+                    {% endif %}
+                </td>
+                <td><strong>{{ req_count_all + my_stats }}</strong></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+{% block js_footer %}
+    {{ super() }}
+    {% stylesheet 'daterangepicker' %}
+    {% javascript 'daterangepicker' %}
+    {% stylesheet 'select2' %}
+    {% javascript 'select2' %}
+
+    {% javascript 'requests_stat' %}
+{% endblock %}

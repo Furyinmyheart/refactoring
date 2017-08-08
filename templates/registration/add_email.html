@@ -1,0 +1,26 @@
+{% extends 'registration/layout.html' %}
+{% block title %}Добавление email{% endblock %}
+
+{% block content %}
+                    <div class="login">
+                        <div class="box">
+                            <div class="header">
+                                <h1 class="text-center">Добавление email</h1>
+                            </div>
+                            <div class="content">
+                                <div class="form loginBox">
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        {{ bootstrap_field(form.email) }}
+                                        <button class="btn btn-default btn-login" type="submit">Отправить подтверждение</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row login_cross_link">
+                        <div class="col-xs-12">
+                            <h4><a href="{{ url('dashboard') }}">Вернуться на сайт &rightarrow;</a></h4>
+                        </div>
+                    </div>
+{% endblock %}
