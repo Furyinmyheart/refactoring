@@ -11,7 +11,7 @@ django-debug-toolbar==1.6
 django-jinja==2.2.2
 django-mptt==0.8.7
 django-stronghold==0.2.8
-djangorestframework==3.5.3
+djangorestframework==3.11.2
 httmock==1.2.6
 isodate==0.5.4
 Jinja2==2.9.4
