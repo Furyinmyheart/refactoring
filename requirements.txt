@@ -16,7 +16,7 @@ httmock==1.2.6
 isodate==0.5.4
 Jinja2==2.9.4
 kombu==4.0.2
-lxml==3.7.2
+lxml==4.9.1
 MarkupSafe==0.23
 olefile==0.44
 Pillow==4.0.0
@@ -25,7 +25,7 @@ python-dateutil==2.6.0
 python-docx==0.8.6
 pytz==2016.10
 reportlab==3.3.0
-requests==2.13.0
+requests==2.20
 requests-toolbelt==0.7.0
 six==1.10.0
 sqlparse==0.2.2
