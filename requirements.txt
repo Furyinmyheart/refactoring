@@ -19,12 +19,12 @@ kombu==4.0.2
 lxml==3.7.2
 MarkupSafe==0.23
 olefile==0.44
-Pillow==4.0.0
+Pillow==9.2.0
 PyPDF2==1.26.0
 python-dateutil==2.6.0
 python-docx==0.8.6
 pytz==2016.10
-reportlab==3.3.0
+reportlab==3.5.55
 requests==2.13.0
 requests-toolbelt==0.7.0
 six==1.10.0
@@ -36,3 +36,4 @@ django-pipeline==1.6.11
 Babel==2.3.4
 raven==6.0.0
 psycopg2
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
